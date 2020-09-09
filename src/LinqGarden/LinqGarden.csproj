@@ -9,9 +9,10 @@
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Description>A library of generic data types and extension methods to encourage declarative programming using Linq and extension methods.</Description>
-		<Copyright>MIT</Copyright>
+		<Copyright>2020</Copyright>
 		<RepositoryUrl>https://github.com/ctollerud/LinqGarden</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
 </Project>
