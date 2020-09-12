@@ -2,6 +2,15 @@
 
 namespace LinqGarden
 {
+	/// <summary>
+	/// Represents a potentially-empty value.
+	/// Serves as an alternative to null for reference types, as well as 
+	/// an alternative to nullable for structs.
+	/// 
+	/// An item is either a "none" (i.e. lacking a value),
+	/// or a "some" (i.e. having a value. )
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	public struct Maybe<T>
 	{
 		private readonly T _value;
@@ -37,6 +46,11 @@ namespace LinqGarden
 
 		public static Maybe<T> None<T>() =>
 			Maybe<T>.None();
+
+		public static T ValueOrDefault<T>( this Maybe<T> input ) =>
+			input.To<T>(
+				() => default( T ),
+				x => x );
 	}
 
 }
