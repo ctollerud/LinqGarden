@@ -18,7 +18,9 @@ namespace LinqGarden.UnitTests.Functions
 		[Fact]
 		public static void Pipe_WhenFunctionIsNull_ArgumentNullExceptionIsThrown() =>
 			12345
-			.Invoking( i => i.Pipe<int, string>( null ) )
-			.Should().Throw<ArgumentNullException>();
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            .Invoking( i => i.Pipe<int, string>( null ) )
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            .Should().Throw<ArgumentNullException>();
 	}
 }
