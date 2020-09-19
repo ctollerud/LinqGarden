@@ -3,7 +3,7 @@
 #>
 $ErrorActionPreference = 'STOP'
 
-function exec {
+function global:exec {
     param (
         [Parameter(Mandatory=$true)]
         [ScriptBlock]$Script
