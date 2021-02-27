@@ -237,6 +237,16 @@ namespace LinqGarden
                     return input;
                 },
                 x => input);
+
+        public static T ValueOr<T>(this Maybe<T> input, T ifNone) =>
+            input.To<T>(
+                () => ifNone,
+                x => x);
+
+        public static T IfNoneThrow<T>(this Maybe<T> input, Func<Exception> ifNone) =>
+            input.To<T>(
+                () => throw ifNone(),
+                x => x);
     }
 
 }

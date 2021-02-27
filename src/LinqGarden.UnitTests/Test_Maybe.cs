@@ -266,5 +266,39 @@ namespace LinqGarden.UnitTests
         [Fact]
         public void Where_WhenFilterReturnsTrue_ResultIsNone() =>
             Maybe.Some(42).Where(x => x == 42).Should().Be(42.ToMaybe());
+
+        [Fact]
+        public void IfSomeDo_WhenInputIsSome_ActionGetsPerformed()
+        {
+            int testValue = 0;
+            42.ToMaybe().IfSomeDo(x => testValue = x);
+            testValue.Should().Be(42);
+        }
+
+        [Fact]
+        public void IfSomeDo_WhenInputIsNone_ActionIsNotPerformed()
+        {
+            int testValue = 0;
+            Maybe.None<int>().IfSomeDo(x => testValue = x);
+            testValue.Should().Be(0);
+        }
+
+        [Fact]
+        public void IfNoneDo_WhenInputIsNone_ActionIsPerformed()
+        {
+            int testValue = 0;
+            Maybe.None<int>().IfNoneDo(() => testValue = 42);
+
+            testValue.Should().Be(42);
+        }
+
+        [Fact]
+        public void IfNoneDo_WhenInputIsSome_ActionIsNotPerformed()
+        {
+            int testValue = 0;
+            Maybe.Some<int>(42).IfNoneDo(() => testValue = 42);
+
+            testValue.Should().Be(0);
+        }
     }
 }

@@ -192,5 +192,11 @@ namespace LinqGarden {
             maybeFailure.To<Fallible<TFailure, Unit>>(
                 failure => Fallible.Failure<TFailure, Unit>(failure),
                 () => Fallible.Success<TFailure, Unit>(Unit.Instance));
+
+        public static TSuccess IfFailureThrow<TFailure, TSuccess>(
+            this Fallible<TFailure, TSuccess> input, Func<TFailure, Exception> ifFailure) =>
+                input.To<TSuccess>(
+                    f => throw ifFailure(f),
+                    s => s);
     }
 }
