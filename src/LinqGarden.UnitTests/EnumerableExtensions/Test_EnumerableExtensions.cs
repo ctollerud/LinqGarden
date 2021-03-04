@@ -59,5 +59,20 @@ namespace LinqGarden.UnitTests.EnumerableExtensions
         [Fact]
         public static void FirstOrNone_WhenFirstValueIsSet_ResultIsValue() =>
             new string?[] { "abc", "def" }.FirstOrNone().Should().Be(Maybe.Some( "abc" ));
+
+        [Fact]
+        public static void Repeat_WhenInputIsEmpty_EmptyEnumerableGetsReturned()
+        {
+            var result = new int[] { }.Repeat().ToList();
+
+        }
+
+        [Fact]
+        public static void Repeat_WhenInputIsPopulated_ExpectedBehaviorOccurs()
+        {
+            var result = new int[] { 1,2,3 }.Repeat().Take(5).ToList();
+
+            result.Should().BeEquivalentTo( new[] { 1, 2, 3, 1, 2 } );
+        }
     }
 }

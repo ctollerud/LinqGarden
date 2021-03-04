@@ -9,6 +9,22 @@ namespace LinqGarden.Enumerables
 {
 	public static class EnumerableExtensions
 	{
+
+        public static IEnumerable<T> Repeat<T>( this ICollection<T> input )
+        {
+            if(input.Count == 0)
+            {
+                yield break;
+            }
+
+            while ( true )
+            {
+                foreach( var item in input )
+                {
+                    yield return item;
+                }
+            }
+        }
 		public static IEnumerable<T> StartWith<T>(this IEnumerable<T> input, T start)
 		{
 			yield return start;
