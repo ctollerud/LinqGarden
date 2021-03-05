@@ -10,6 +10,12 @@ namespace LinqGarden.Enumerables
 	public static class EnumerableExtensions
 	{
 
+        /// <summary>
+        /// Repeat the provided collection an infinite number of times.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static IEnumerable<T> Repeat<T>( this ICollection<T> input )
         {
             if(input.Count == 0)
