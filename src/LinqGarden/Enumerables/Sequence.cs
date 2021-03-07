@@ -27,5 +27,19 @@ namespace LinqGarden.Enumerables
                 nextValue = propagate( nextValue );
             }
         }
+
+        /// <summary>
+        /// Repeat a given value infinitely
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> Repeat<T>( T value )
+        {
+            while(true)
+            {
+                yield return value;
+            }
+        }
     }
 }
