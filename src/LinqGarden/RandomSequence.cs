@@ -9,7 +9,7 @@ namespace LinqGarden
     {
         internal Random<IEnumerable<T>> Random { get; }
 
-        internal RandomSequence( Random<IEnumerable<T>> random )
+        internal RandomSequence(Random<IEnumerable<T>> random)
         {
             Random = random;
         }
@@ -37,6 +37,32 @@ namespace LinqGarden
             return new Random<IEnumerable<T>>(ConcatImpl).AsRandomSequence();
         }
 
+        public static RandomSequence<T> Return<T>(IEnumerable<T> input) =>
+            MakeRandom.Return(input).AsRandomSequence();
+
+        public static RandomSequence<T> Empty<T>() =>
+            Return(Enumerable.Empty<T>());
+
+        private static RandomSequence<TNew> TransformEnumerable<TOld, TNew>(this RandomSequence<TOld> input, Func<IEnumerable<TOld>, IEnumerable<TNew>> transform) =>
+            input.AsRandom().Select(transform).AsRandomSequence();
+
+        public static RandomSequence<T> Concat<T>(this RandomSequence<T> thisSequence, RandomSequence<T> nextSequence) =>
+            (from first in thisSequence.AsRandom()
+             from next in nextSequence.AsRandom()
+             select first.Concat(next)
+            ).AsRandomSequence();
+
+        public static RandomSequence<T> StartWith<T>(this RandomSequence<T> input, T startWith) =>
+            input.TransformEnumerable(x => x.StartWith(startWith));
+
+        public static RandomSequence<T> ToRandomSequence<T>(this Random<T> input) =>
+            input.Select(x => new[] { x }.AsEnumerable()).AsRandomSequence();
+
+        public static RandomSequence<T> StartWith<T>(this RandomSequence<T> input, Random<T> startWith) =>
+            from startingValue in startWith.ToRandomSequence()
+            from combined in input.StartWith(startingValue)
+            select combined;
+
         public static RandomSequence<TSecond> Select<TFirst, TSecond>(
             this RandomSequence<TFirst> input,
             Func<TFirst, TSecond> transformation) =>
@@ -54,7 +80,7 @@ namespace LinqGarden
                     let middleSequence = transformation(item)
                     select
                         from transformedItems in middleSequence.AsRandom()
-                        select 
+                        select
                             from transformedItem in transformedItems
                             select combiner(item, transformedItem)
                 from sequenceOfSequences in
@@ -96,10 +122,10 @@ namespace LinqGarden
 
 
 
-        public static RandomSequence<T> Repeat<T>( this Random<T> input) =>
+        public static RandomSequence<T> Repeat<T>(this Random<T> input) =>
             Sequence.Repeat(input).AsRandomSequence();
 
-        public static RandomSequence<T> Repeat<T>( this Random<T> value, int numberOfRepeats) =>
+        public static RandomSequence<T> Repeat<T>(this Random<T> value, int numberOfRepeats) =>
             Enumerable.Repeat(value, numberOfRepeats).AsRandomSequence();
     }
 
