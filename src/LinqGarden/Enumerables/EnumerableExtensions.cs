@@ -40,11 +40,20 @@ namespace LinqGarden.Enumerables
 			}
 		}
 
-		/// <summary>
-		/// Returns the sequence as a collection.
-		/// If the input is already a collection, then no work is performed other than casting to an ICollection
-		/// </summary>
-		public static ICollection<T> AsCollection<T>( this IEnumerable<T> input )
+        public static IEnumerable<T> EndWith<T>(this IEnumerable<T> input, T last)
+        {
+            foreach (var item in input)
+            {
+                yield return item;
+            }
+            yield return last;
+        }
+
+        /// <summary>
+        /// Returns the sequence as a collection.
+        /// If the input is already a collection, then no work is performed other than casting to an ICollection
+        /// </summary>
+        public static ICollection<T> AsCollection<T>( this IEnumerable<T> input )
 		{
 			return input switch
 			{
