@@ -124,5 +124,83 @@ namespace LinqGarden.Enumerables
                 input.SelectMany(
                     collectionSelector.Then(x => x.ToEnumerable()),
                     resultSelector);
-	}
+
+
+        /// <summary>
+        /// Accumulate a value and emit it each time it changes
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TAccumulate"></typeparam>
+        /// <param name="input"></param>
+        /// <param name="seed"></param>
+        /// <param name="aggregator"></param>
+        /// <returns></returns>
+        public static IEnumerable<TAccumulate> AggregateSequence<TSource, TAccumulate>(
+            this IEnumerable<TSource> input,
+            TAccumulate seed,
+            Func<TAccumulate,TSource,TAccumulate> aggregator )
+        {
+            var accumulator = seed;
+            foreach( var value in input )
+            {
+                accumulator = aggregator(accumulator,value);
+                yield return accumulator;
+            }
+        }
+
+        /// <summary>
+        /// Iterate over the collection in a pairwise fashion
+        /// There must be at least 2 items in the sequence for iteration to be performed
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static IEnumerable<(T,T)> Pairwise<T>( this IEnumerable<T> input )
+        {
+            //suppress the nullability warning.  This will never be iterated over from the caller's perspective.
+            //we just need some default values to prime the pump of the aggregator.
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+            (T, T) seed = (default(T), default(T));
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
+
+            return
+                input.AggregateSequence(seed, (acc, next) => (acc.Item2, next))
+
+                //first value is garbage.
+                .Skip(1);
+
+        }
+
+        public static IEnumerable<(T1, T2)> Zip<T1, T2>(this IEnumerable<T1> input, IEnumerable<T2> next) =>
+            input.Zip(next, (x, y) => (x, y));
+
+        public static IEnumerable<T4> Zip<T1, T2, T3, T4>(
+            this IEnumerable<T1> input,
+            IEnumerable<T2> next,
+            IEnumerable<T3> next2,
+            Func<T1, T2, T3, T4> combiner) =>
+            input.Zip(next).Zip(next2, (tuple, last) => combiner(tuple.Item1, tuple.Item2, last));
+
+        public static IEnumerable<(T1, T2, T3)> Zip<T1, T2, T3>(
+            this IEnumerable<T1> input,
+            IEnumerable<T2> next,
+            IEnumerable<T3> next2) =>
+                input.Zip<T1, T2, T3, (T1, T2, T3)>(next, next2, (x, y, z) => (x, y, z));
+
+        public static IEnumerable<T5> Zip<T1, T2, T3, T4, T5>(
+            this IEnumerable<T1> input,
+            IEnumerable<T2> next,
+            IEnumerable<T3> next2,
+            IEnumerable<T4> next3,
+            Func<T1, T2, T3, T4, T5> combiner) =>
+            input.Zip(next, next2).Zip(next3, (tuple, last) => combiner(tuple.Item1, tuple.Item2, tuple.Item3, last));
+
+        public static IEnumerable<(T1, T2, T3, T4)> Zip<T1, T2, T3, T4>(
+            this IEnumerable<T1> input,
+            IEnumerable<T2> next,
+            IEnumerable<T3> next2,
+            IEnumerable<T4> next3) =>
+            input.Zip(next, next2, next3, (a, b, c, d) => (a, b, c, d));
+
+    }
 }

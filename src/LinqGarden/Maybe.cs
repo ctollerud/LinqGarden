@@ -119,7 +119,7 @@ namespace LinqGarden
         /// Returns the underlying value for the Maybe, or the default value 
         /// for type if the input is a None.
         /// 
-        /// In the case of classes, this default would often be null, so use with care.
+        /// In the case of reference types, this default would often be null, so use with care.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="input"></param>

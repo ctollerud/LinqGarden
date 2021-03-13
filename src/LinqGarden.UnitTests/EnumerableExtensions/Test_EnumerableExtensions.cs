@@ -74,5 +74,41 @@ namespace LinqGarden.UnitTests.EnumerableExtensions
 
             result.Should().BeEquivalentTo( new[] { 1, 2, 3, 1, 2 } );
         }
+
+        [Fact]
+        public static void Pairwise_WhenInputIsEmpty_ResultIsEmpty()
+        {
+            new int[] { }.Pairwise().Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void Pairwise_WhenInputHasOneItem_ResultIsEmpty()
+        {
+            new int[] { 42 }.Pairwise().Should().BeEmpty();
+        }
+
+        [Fact]
+        public static void Pairwise_WhenInputHasTwoItems_ResultHasOneItem()
+        {
+            new int[] { 42, 43 }.Pairwise().Should().BeEquivalentTo(new[] { (42, 43) });
+        }
+
+        [Fact]
+        public static void Pairwise_WhenInputHasFiveItems_ResultHasFourItems()
+        {
+            new int[] { 1,2,3,4,5 }.Pairwise().Should().BeEquivalentTo(new[] { (1,2), (2,3), (3,4), (4,5) });
+        }
+
+        [Fact]
+        public static void Pairwise_WorksAppropriatelyWithReferenceTypes()
+        {
+            new [] { "abc","def", "ghi" }.Pairwise().Should().BeEquivalentTo(new[] { ( "abc", "def" ), ( "def", "ghi" ) });
+        }
+
+        [Fact]
+        public static void Pairwise_WorksAppropriatelyWithNullableReferenceTypes()
+        {
+            new[] { null, "def", "ghi" }.Pairwise().Should().BeEquivalentTo(new[] { (null, "def"), ("def", "ghi") });
+        }
     }
 }
