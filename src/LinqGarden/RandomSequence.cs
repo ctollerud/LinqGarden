@@ -23,6 +23,9 @@ namespace LinqGarden
         public static Random<IEnumerable<T>> AsRandom<T>(this RandomSequence<T> input) =>
             input.Random;
 
+        public static Random<TNew> Collapse<T, TNew>(this RandomSequence<T> input, Func<IEnumerable<T>, TNew> collapser) =>
+            input.AsRandom().Select(collapser);
+
         public static RandomSequence<T> AsRandomSequence<T>(this IEnumerable<Random<T>> input)
         {
 
