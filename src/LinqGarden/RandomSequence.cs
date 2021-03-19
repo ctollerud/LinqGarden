@@ -58,6 +58,12 @@ namespace LinqGarden
         public static RandomSequence<T> StartWith<T>(this RandomSequence<T> input, T startWith) =>
             input.TransformEnumerable(x => x.StartWith(startWith));
 
+        /// <summary>
+        /// Convert the random into a single-item sequence.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static RandomSequence<T> ToRandomSequence<T>(this Random<T> input) =>
             input.Select(x => new[] { x }.AsEnumerable()).AsRandomSequence();
 
