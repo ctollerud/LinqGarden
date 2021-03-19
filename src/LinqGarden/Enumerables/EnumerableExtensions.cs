@@ -171,36 +171,5 @@ namespace LinqGarden.Enumerables
 
         }
 
-        public static IEnumerable<(T1, T2)> Zip<T1, T2>(this IEnumerable<T1> input, IEnumerable<T2> next) =>
-            input.Zip(next, (x, y) => (x, y));
-
-        public static IEnumerable<T4> Zip<T1, T2, T3, T4>(
-            this IEnumerable<T1> input,
-            IEnumerable<T2> next,
-            IEnumerable<T3> next2,
-            Func<T1, T2, T3, T4> combiner) =>
-            input.Zip(next).Zip(next2, (tuple, last) => combiner(tuple.Item1, tuple.Item2, last));
-
-        public static IEnumerable<(T1, T2, T3)> Zip<T1, T2, T3>(
-            this IEnumerable<T1> input,
-            IEnumerable<T2> next,
-            IEnumerable<T3> next2) =>
-                input.Zip<T1, T2, T3, (T1, T2, T3)>(next, next2, (x, y, z) => (x, y, z));
-
-        public static IEnumerable<T5> Zip<T1, T2, T3, T4, T5>(
-            this IEnumerable<T1> input,
-            IEnumerable<T2> next,
-            IEnumerable<T3> next2,
-            IEnumerable<T4> next3,
-            Func<T1, T2, T3, T4, T5> combiner) =>
-            input.Zip(next, next2).Zip(next3, (tuple, last) => combiner(tuple.Item1, tuple.Item2, tuple.Item3, last));
-
-        public static IEnumerable<(T1, T2, T3, T4)> Zip<T1, T2, T3, T4>(
-            this IEnumerable<T1> input,
-            IEnumerable<T2> next,
-            IEnumerable<T3> next2,
-            IEnumerable<T4> next3) =>
-            input.Zip(next, next2, next3, (a, b, c, d) => (a, b, c, d));
-
     }
 }
