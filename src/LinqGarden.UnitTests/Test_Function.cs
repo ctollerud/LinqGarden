@@ -6,10 +6,10 @@ using Xunit;
 
 namespace LinqGarden.UnitTests
 {
-    public class Test_FallibleFunctionBuilder
+    public class Test_Function
     {
         [Fact]
-        public void WhenCatchingException_ExpectedBehaviorOccurs()
+        public void WhenCatchingExceptionAsFailure_ExpectedBehaviorOccurs()
         {
             var expectedThrownException = new InvalidOperationException("Oh no");
 
