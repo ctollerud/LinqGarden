@@ -14,8 +14,8 @@ namespace LinqGarden.UnitTests
 			var resultValue = 
 				Fallible.Failure<string, int>( "oops" )
 					.Select( x => x + 1 );
-			resultValue.FailureValue.ValueOrDefault().Should().Be( "oops" );
-			resultValue.SuccessValue.ValueOrDefault().Should().Be( default( int ) );
+			resultValue.GetFailure().ValueOrDefault().Should().Be( "oops" );
+			resultValue.GetSuccess().ValueOrDefault().Should().Be( default( int ) );
 		}
 
 		[Fact]
@@ -24,8 +24,8 @@ namespace LinqGarden.UnitTests
 			var resultValue =
 				Fallible.Success<string, int>( 42 )
 					.Select( x => x + 1 );
-			resultValue.FailureValue.ValueOrDefault().Should().BeNull();
-			resultValue.SuccessValue.ValueOrDefault().Should().Be( 43 );
+			resultValue.GetFailure().ValueOrDefault().Should().BeNull();
+			resultValue.GetSuccess().ValueOrDefault().Should().Be( 43 );
 		}
 
 		[Fact]
@@ -34,8 +34,8 @@ namespace LinqGarden.UnitTests
 			var resultValue =
 				Fallible.Failure<string, int>( "oops" )
 					.SelectMany( x => Fallible.Success<string,int>( x + 1 ), (x,y) => (x + y).ToString() );
-			resultValue.FailureValue.ValueOrDefault().Should().Be( "oops" );
-			resultValue.SuccessValue.ValueOrDefault().Should().Be( null );
+			resultValue.GetFailure().ValueOrDefault().Should().Be( "oops" );
+			resultValue.GetSuccess().ValueOrDefault().Should().Be( null );
 		}
 
 		[Fact]
@@ -44,8 +44,8 @@ namespace LinqGarden.UnitTests
 			var resultValue =
 				Fallible.Success<string, int>( 42 )
 					.SelectMany( x => Fallible.Failure<string, int>( "oops" ), ( x, y ) => ( x + y ).ToString() );
-			resultValue.FailureValue.ValueOrDefault().Should().Be( "oops" );
-			resultValue.SuccessValue.ValueOrDefault().Should().Be( default );
+			resultValue.GetFailure().ValueOrDefault().Should().Be( "oops" );
+			resultValue.GetSuccess().ValueOrDefault().Should().Be( default );
 		}
 
 		[Fact]
@@ -54,24 +54,24 @@ namespace LinqGarden.UnitTests
 			var resultValue =
 				Fallible.Success<string, int>( 42 )
 					.SelectMany( x => Fallible.Success<string, int>( x + 1 ), ( x, y ) => ( x + y ).ToString() );
-			resultValue.FailureValue.ValueOrDefault().Should().Be( null );
-			resultValue.SuccessValue.ValueOrDefault().Should().Be( (42+43).ToString() );
+			resultValue.GetFailure().ValueOrDefault().Should().Be( null );
+			resultValue.GetSuccess().ValueOrDefault().Should().Be( (42+43).ToString() );
 		}
 
 		[Fact]
 		public void IfNoneFail_WhenInputIsNone_ResultIsFailure()
 		{
 			var resultValue = Maybe.None<string>().IfNoneFail( "fail" );
-			resultValue.FailureValue.ValueOrDefault().Should().Be( "fail" );
-			resultValue.SuccessValue.ValueOrDefault().Should().BeNull();
+			resultValue.GetFailure().ValueOrDefault().Should().Be( "fail" );
+			resultValue.GetSuccess().ValueOrDefault().Should().BeNull();
 		}
 
 		[Fact]
 		public void IfNoneFail_WhenInputIsSome_ResultIsSuccess()
 		{
 			var resultValue = Maybe.Some( 42 ).IfNoneFail( "fail" );
-			resultValue.FailureValue.ValueOrDefault().Should().BeNull();
-			resultValue.SuccessValue.ValueOrDefault().Should().Be( 42 );
+			resultValue.GetFailure().ValueOrDefault().Should().BeNull();
+			resultValue.GetSuccess().ValueOrDefault().Should().Be( 42 );
 		}
 	}
 }

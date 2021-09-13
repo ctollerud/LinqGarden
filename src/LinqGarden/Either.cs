@@ -50,5 +50,8 @@ namespace LinqGarden
         public static Maybe<TRight> GetRight<TLeft, TRight>(this Either<TLeft, TRight> input) =>
             input.IsRight ? Maybe.Some(input.RawRightValue) : Maybe.None<TRight>();
 
+        public static Maybe<TLeft> GetLeft<TLeft, TRight>(this Either<TLeft, TRight> input) =>
+            !input.IsRight ? Maybe.Some(input.RawLeftValue) : Maybe.None<TLeft>();
+
     }
 }

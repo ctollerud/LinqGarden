@@ -6,21 +6,18 @@ using LinqGarden.Functions;
 
 namespace LinqGarden {
 
-    public class Fallible<TFailure, TSuccess>
+    public interface Fallible<out TFailure, out TSuccess>
     {
-        private readonly Either<TFailure, TSuccess> _Data;
-
-        internal Fallible(Either<TFailure, TSuccess> data)
-        {
-            _Data = data ?? throw new ArgumentNullException(nameof(data));
-        }
-
-        public Maybe<TFailure> FailureValue => _Data.LeftValue;
-
-        public Maybe<TSuccess> SuccessValue => _Data.RightValue;
-
+        internal Either<TFailure,TSuccess> Data { get; }
         public TTo To<TTo>(Func<TFailure, TTo> ifFailure, Func<TSuccess, TTo> ifSuccess) =>
-            _Data.To<TTo>(ifFailure, ifSuccess);
+            Data.To<TTo>(ifFailure, ifSuccess);
+    }
+
+    public record FallibleImpl<TFailure, TSuccess>(
+        Either<TFailure,TSuccess> Data
+        ) : Fallible<TFailure,TSuccess>
+    {
+        Either<TFailure, TSuccess> Fallible<TFailure, TSuccess>.Data => Data;
     }
 
     public static class Fallible
@@ -33,7 +30,7 @@ namespace LinqGarden {
         /// <param name="failureValue"></param>
         /// <returns></returns>
         public static Fallible<TFailure, TSuccess> Failure<TFailure, TSuccess>(TFailure failureValue) =>
-            new Fallible<TFailure, TSuccess>(Either.Left<TFailure, TSuccess>(failureValue));
+            new FallibleImpl<TFailure, TSuccess>(Either.Left<TFailure, TSuccess>(failureValue));
 
         /// <summary>
         /// Construct a success value
@@ -43,7 +40,13 @@ namespace LinqGarden {
         /// <param name="successValue"></param>
         /// <returns></returns>
         public static Fallible<TFailure, TSuccess> Success<TFailure, TSuccess>(TSuccess successValue) =>
-            new Fallible<TFailure, TSuccess>(Either.Right<TFailure, TSuccess>(successValue));
+            new FallibleImpl<TFailure, TSuccess>(Either.Right<TFailure, TSuccess>(successValue));
+
+        public static Maybe<TFailure> GetFailure<TFailure, TSuccess>(this Fallible<TFailure, TSuccess> input) =>
+            input.Data.GetLeft();
+
+        public static Maybe<TSuccess> GetSuccess<TFailure, TSuccess>(this Fallible<TFailure, TSuccess> input) =>
+            input.Data.GetRight();
 
         /// <summary>
         /// If the Maybe has a value, then the result will be a success.
@@ -147,7 +150,7 @@ namespace LinqGarden {
             this Fallible<TFailure, TSuccess> input,
             Action<TFailure> ifFailure)
         {
-            input.FailureValue.IfSomeDo(ifFailure);
+            input.GetFailure().IfSomeDo(ifFailure);
             return input;
         }
 
@@ -163,7 +166,7 @@ namespace LinqGarden {
             this Fallible<TFailure, TSuccess> input,
             Action<TSuccess> ifSuccess)
         {
-            input.SuccessValue.IfSomeDo(ifSuccess);
+            input.GetSuccess().IfSomeDo(ifSuccess);
             return input;
         }
 

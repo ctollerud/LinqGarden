@@ -88,7 +88,7 @@ namespace LinqGarden
 		public static bool operator !=( Maybe<T> first, Maybe<T> other ) =>
 			!first.Equals( other );
 
-        public override bool Equals( object obj ) =>
+        public override bool Equals( object? obj ) =>
 			obj is Maybe<T> maybe && Equals( maybe );
 
 		public override int GetHashCode() =>

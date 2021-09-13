@@ -21,7 +21,7 @@ namespace LinqGarden.UnitTests
                 }
             })
             .Catch<InvalidOperationException>().Invoke()
-            .FailureValue.Should().Be(expectedThrownException.ToMaybe());
+            .GetFailure().Should().Be(expectedThrownException.ToMaybe());
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace LinqGarden.UnitTests
         [Fact]
         public void WhenFunctionSucceeds_ExpectedValueGetsReturned()
         {
-            FallibleFunction.Build(() => 42).Catch<Exception>().Invoke().SuccessValue
+            FallibleFunction.Build(() => 42).Catch<Exception>().Invoke().GetSuccess()
                 .Should().Be(42.ToMaybe());
         }
     }
