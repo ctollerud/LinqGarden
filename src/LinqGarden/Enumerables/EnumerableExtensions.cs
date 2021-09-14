@@ -100,7 +100,7 @@ namespace LinqGarden.Enumerables
 			foreach( var item in input.Take(1) )
 			{
 				//If a value is located, then use it.
-				responseVal = item.ToMaybe();
+				responseVal = item.NoneIfNull();
 			}
 
 			return responseVal;
@@ -127,7 +127,9 @@ namespace LinqGarden.Enumerables
 
 
         /// <summary>
-        /// Accumulate a value and emit it each time it changes
+        /// Accumulate a value and emit it each time it changes.
+        /// 
+        /// The resulting sequence will be the same length as the input sequence.
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TAccumulate"></typeparam>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using FluentAssertions;
 using Xunit;
@@ -13,7 +14,7 @@ namespace LinqGarden.UnitTests
         {
             var expectedThrownException = new InvalidOperationException("Oh no");
 
-            Function.FromAction(() =>
+            Function.From(() =>
             {
                 if (true)
                 {
@@ -21,8 +22,47 @@ namespace LinqGarden.UnitTests
                 }
             })
             .CatchAsFailure<InvalidOperationException>().Invoke()
-            .GetFailure().Should().Be(expectedThrownException.ToMaybe());
+            .GetFailure().Should().Be(expectedThrownException.NoneIfNull());
         }
+
+        [Fact]
+        public void MultipleExceptionsAreToBeCaught_ExpectedExceptionIsCaught()
+        {
+            var expectedThrownException = new InvalidOperationException("Oh no") as Exception;
+
+            Function.From(() =>
+            {
+                if (true)
+                {
+                    throw expectedThrownException;
+                }
+            })
+            .CatchAsFailure<InvalidOperationException>()
+            .CatchAsFailure<DirectoryNotFoundException>()
+            .Invoke()
+            .GetFailure().Should().Be(expectedThrownException.NoneIfNull());
+        }
+
+        [Fact]
+        public void MultipleExceptionsAreToBeCaught_ExpectedExceptionIsCaught2()
+        {
+            var expectedThrownException = new DirectoryNotFoundException("Oh no") as Exception;
+
+            Function.From(() =>
+            {
+                if (true)
+                {
+                    throw expectedThrownException;
+                }
+            })
+            .CatchAsFailure<InvalidOperationException>()
+            .CatchAsFailure<DirectoryNotFoundException>()
+            .CatchAsFailure<Exception>()
+            .Invoke()
+            .GetFailure().Should().Be(expectedThrownException.NoneIfNull());
+        }
+
+
 
         [Fact]
         public void WhenFailingToCatchException_ExceptionIsThrown()
@@ -30,22 +70,22 @@ namespace LinqGarden.UnitTests
             var expectedThrownException = new Exception("Oh no");
             Assert.Throws<Exception>(() =>
             {
-                Function.FromAction(() =>
+                Function.From(() =>
                 {
                     if (true)
                     {
                         throw expectedThrownException;
                     }
                 })
-                .Catch<InvalidOperationException>().Invoke();
+                .CatchAsFailure<InvalidOperationException>().Invoke();
             });
         }
 
         [Fact]
         public void WhenFunctionSucceeds_ExpectedValueGetsReturned()
         {
-            FallibleFunction.Build(() => 42).Catch<Exception>().Invoke().GetSuccess()
-                .Should().Be(42.ToMaybe());
+            Function.From<int,int>(x => x+2).CatchAsFailure<Exception>().Invoke(2).GetSuccess()
+                .Should().Be(4.NoneIfNull());
         }
     }
 }

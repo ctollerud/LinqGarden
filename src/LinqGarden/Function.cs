@@ -57,10 +57,23 @@ namespace LinqGarden
         public static Function<Unit, TOut> From<TOut>(Func<TOut> func) =>
             new FunctionImpl<Unit, TOut>( _ => func() );
 
+        public static Function<Unit, Unit> From(Action action) =>
+            FromAction(action);
+
+        public static Function<TIn, Unit> From<TIn>(Action<TIn> action) =>
+            FromAction(action);
+
         public static Function<Unit, Unit> FromAction(Action action) =>
             new FunctionImpl<Unit, Unit>(_ =>
             {
                 action();
+                return Unit.Instance;
+            });
+
+        public static Function<TIn, Unit> FromAction<TIn>(Action<TIn> action) =>
+            new FunctionImpl<TIn, Unit>(x =>
+            {
+                action(x);
                 return Unit.Instance;
             });
 

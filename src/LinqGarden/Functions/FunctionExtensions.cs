@@ -23,27 +23,6 @@ namespace LinqGarden.Functions
 			( func ?? throw new ArgumentNullException( nameof( func ) ) )
 			( input );
 
-		/// <summary>
-		/// Converts the action to a Unit->Unit function so it can be used in more contexts
-		/// </summary>
-		/// <param name="action"></param>
-		/// <returns></returns>
-		[Pure]
-		public static Func<Unit,Unit> Function( Action action ) => _ =>
-        {
-            action();
-            return Unit.Instance;
-        };
-
-        /// <summary>
-        /// Converts the func to a Unit->T function so it can be used in more contexts
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="function"></param>
-        /// <returns></returns>
-        [Pure]
-        public static Func<Unit, T> Function<T>(Func<T> function) => _ => function();
-
         /// <summary>
         /// Composes the functions so that the result of the input is passed to the second function
         /// </summary>

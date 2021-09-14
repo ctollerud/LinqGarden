@@ -8,7 +8,7 @@ namespace LinqGarden
     public static class MakeRandom
     {
         private static Random<T> Make<T>(Func<Random, T> func) =>
-            new Random<T>(func);
+            new RandomImpl<T>(func);
 
         public static Random<T> Return<T>(T returnValue) => Make(_ => returnValue);
 

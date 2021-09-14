@@ -121,13 +121,13 @@ namespace LinqGarden.UnitTests
 
         [Fact]
         public void ToMaybe_WhenInputIsNull_ResultIsNone() =>
-            (null as StringBuilder).ToMaybe().Should().Be(Maybe.None<StringBuilder>());
+            (null as StringBuilder).NoneIfNull().Should().Be(Maybe.None<StringBuilder>());
 
         [Fact]
         public void ToMaybe_WhenInputHasValue_ResultHasValue()
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.ToMaybe().Should().Be(Maybe.Some(stringBuilder));
+            stringBuilder.NoneIfNull().Should().Be(Maybe.Some(stringBuilder));
         }
 
         private class Incrementor
@@ -146,7 +146,7 @@ namespace LinqGarden.UnitTests
         {
             var incrementor = new Incrementor();
 
-            42.ToMaybe().Select(incrementor.Increment).ValueOrDefault().Should().Be(43);
+            42.NoneIfNull().Select(incrementor.Increment).ValueOrDefault().Should().Be(43);
 
             incrementor.WasCalled.Should().BeTrue();
         }
@@ -169,7 +169,7 @@ namespace LinqGarden.UnitTests
 
             Maybe.None<int>()
                 .SelectMany(
-                    x => firstIncrementor.Increment(x).ToMaybe(),
+                    x => firstIncrementor.Increment(x).NoneIfNull(),
                     (x, y) => secondIncrementor.Increment(x + y))
             .Should().Be(Maybe.None<int>());
 
@@ -183,9 +183,9 @@ namespace LinqGarden.UnitTests
             var firstIncrementor = new Incrementor();
             var secondIncrementor = new Incrementor();
 
-            42.ToMaybe()
+            42.NoneIfNull()
                 .SelectMany(
-                    x => firstIncrementor.Increment(x).ToMaybe().Where(x => x != 43),
+                    x => firstIncrementor.Increment(x).NoneIfNull().Where(x => x != 43),
                     (x, y) => secondIncrementor.Increment(x + y))
            .Should().Be(Maybe.None<int>());
 
@@ -199,11 +199,11 @@ namespace LinqGarden.UnitTests
             var firstIncrementor = new Incrementor();
             var secondIncrementor = new Incrementor();
 
-            42.ToMaybe()
+            42.NoneIfNull()
                 .SelectMany(
-                    x => firstIncrementor.Increment(x).ToMaybe(),
+                    x => firstIncrementor.Increment(x).NoneIfNull(),
                     (x, y) => secondIncrementor.Increment(x + y))
-            .Should().Be((42 + 43 + 1).ToMaybe());
+            .Should().Be((42 + 43 + 1).NoneIfNull());
 
             firstIncrementor.WasCalled.Should().BeTrue();
             secondIncrementor.WasCalled.Should().BeTrue();
@@ -216,7 +216,7 @@ namespace LinqGarden.UnitTests
             var secondIncrementor = new Incrementor();
 
             (from x in Maybe.None<int>()
-             from incremented in firstIncrementor.Increment(x).ToMaybe()
+             from incremented in firstIncrementor.Increment(x).NoneIfNull()
              select x + incremented)
             .Should().Be(Maybe.None<int>());
 
@@ -230,8 +230,8 @@ namespace LinqGarden.UnitTests
             var firstIncrementor = new Incrementor();
             var secondIncrementor = new Incrementor();
 
-            (from x in 42.ToMaybe()
-             from incremented in firstIncrementor.Increment(x).ToMaybe().Where(x => x != 43)
+            (from x in 42.NoneIfNull()
+             from incremented in firstIncrementor.Increment(x).NoneIfNull().Where(x => x != 43)
              select secondIncrementor.Increment(x + incremented))
             .Should().Be(Maybe.None<int>());
 
@@ -245,11 +245,11 @@ namespace LinqGarden.UnitTests
             var firstIncrementor = new Incrementor();
             var secondIncrementor = new Incrementor();
 
-            (from x in 42.ToMaybe()
-             from incremented in firstIncrementor.Increment(x).ToMaybe()
+            (from x in 42.NoneIfNull()
+             from incremented in firstIncrementor.Increment(x).NoneIfNull()
              select secondIncrementor.Increment(x + incremented))
             .Should().Be(
-                ((42 + 43) + 1).ToMaybe());
+                ((42 + 43) + 1).NoneIfNull());
 
             firstIncrementor.WasCalled.Should().BeTrue();
             secondIncrementor.WasCalled.Should().BeTrue();
@@ -265,13 +265,13 @@ namespace LinqGarden.UnitTests
 
         [Fact]
         public void Where_WhenFilterReturnsTrue_ResultIsNone() =>
-            Maybe.Some(42).Where(x => x == 42).Should().Be(42.ToMaybe());
+            Maybe.Some(42).Where(x => x == 42).Should().Be(42.NoneIfNull());
 
         [Fact]
         public void IfSomeDo_WhenInputIsSome_ActionGetsPerformed()
         {
             int testValue = 0;
-            42.ToMaybe().IfSomeDo(x => testValue = x);
+            42.NoneIfNull().IfSomeDo(x => testValue = x);
             testValue.Should().Be(42);
         }
 
@@ -300,5 +300,21 @@ namespace LinqGarden.UnitTests
 
             testValue.Should().Be(0);
         }
+
+
+        /// <summary>
+        /// You shouldn't do this in practice use "AsMaybe" to strip the 
+        /// struct out of the nullable construct.
+        /// </summary>
+        [Fact]
+        public void ToMaybeWorksOnNullables() =>
+            default(int?).NoneIfNull().Should().Be(Maybe.None<int?>());
+
+        /// <summary>
+        /// You shouldn't do this in practice
+        /// </summary>
+        [Fact]
+        public void ToMaybeWorksOnNullables2() =>
+            new int?(42).NoneIfNull().Should().Be(Maybe.Some<int?>(42));
     }
 }

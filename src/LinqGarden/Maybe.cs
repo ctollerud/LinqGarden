@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace LinqGarden
 {
 	/// <summary>
-	/// Represents a potentially-empty value.
+	/// Represents a potentially-absent value.
 	/// Serves as an alternative to null for reference types, as well as 
 	/// an alternative to nullable for structs.
 	/// 
@@ -19,7 +19,7 @@ namespace LinqGarden
         /// <summary>
         /// stores the underlying value for the Maybe.
         /// </summary>
-		private readonly T _value;
+		internal T RawValue { get; }
 
         /// <summary>
         /// true if there is a value present.
@@ -28,15 +28,15 @@ namespace LinqGarden
 
 		private Maybe( T value, bool hasValue )
 		{
-			_value = value;
+			RawValue = value;
 			HasValue = hasValue;
 		}
 
 		public TTo To<TTo>( Func<TTo> ifNone, Func<T,TTo> ifSome ) =>
-			HasValue ? ifSome( _value ) : ifNone();
+			HasValue ? ifSome(RawValue) : ifNone();
 
 		public TTo To<TTo>( Func<T, TTo> ifSome, Func<TTo> ifNone ) =>
-			HasValue ? ifSome( _value ) : ifNone();
+			HasValue ? ifSome(RawValue) : ifNone();
 
         /// <summary>
         /// Convert the maybe to a sequence of zero to one items
@@ -45,10 +45,12 @@ namespace LinqGarden
         public IEnumerable<T> ToEnumerable()
         {
 
-            // checking that value != null to convince compiler that result items in sequence are not nullable
-            if (HasValue && _value != null) 
+            if (HasValue) 
             {
-                yield return _value;
+                //The compiler isn't sure if RawValue has a value.  But we're sure
+                #nullable disable
+                yield return RawValue;
+                #nullable enable
             }
         }
 
@@ -61,7 +63,7 @@ namespace LinqGarden
         /// Used to ease implementation of some other odds and ends.
         /// </summary>
         /// <returns></returns>
-		private (bool, T) BuildComparisonTuple() => (HasValue, _value);
+		private (bool, T) BuildComparisonTuple() => (HasValue, RawValue);
 
         /// <summary>
         /// Two maybes are considered equal if:
@@ -114,38 +116,36 @@ namespace LinqGarden
         /// <returns></returns>
 		public static Maybe<T> None<T>() => default;
 
-#nullable disable
+
         /// <summary>
         /// Returns the underlying value for the Maybe, or the default value 
         /// for type if the input is a None.
         /// 
-        /// In the case of reference types, this default would often be null, so use with care.
+        /// CAUTION:  In the case of reference types, this default would often be null, so use with care.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static T ValueOrDefault<T>( this Maybe<T> input ) =>
-			input.To<T>(
-				() => default( T ),
-				x => x );
-#nullable enable
+        public static T? ValueOrDefault<T>(this Maybe<T> input) =>
+            input.HasValue ? input.RawValue : default(T);
+
 
         /// <summary>
         /// Converts the input to a Maybe.
         /// 
-        /// if the input is null then the result will be unset.
+        /// if the input equals null then the result will be unset.
         /// In all other circumstances, the Maybe will have a value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static Maybe<T> ToMaybe<T>( this T input )
+        public static Maybe<T> NoneIfNull<T>( this T? input )
 		{
 			if( input == null )
 			{
 				return default;
 			}
-			return Some( input );
+			return Some( (T)input );
 		}
 
         /// <summary>

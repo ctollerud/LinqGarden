@@ -5,20 +5,23 @@ using LinqGarden.Enumerables;
 
 namespace LinqGarden
 {
-    public class RandomSequence<T>
+    public interface RandomSequence<out T>
     {
         internal Random<IEnumerable<T>> Random { get; }
-
-        internal RandomSequence(Random<IEnumerable<T>> random)
-        {
-            Random = random;
-        }
     }
+
+    internal record RandomSequenceImpl<T>(
+        Random<IEnumerable<T>> Random )
+        : RandomSequence<T>
+    {
+        Random<IEnumerable<T>> RandomSequence<T>.Random => Random;
+    }
+
 
     public static class RandomSequence
     {
         public static RandomSequence<T> AsRandomSequence<T>(this Random<IEnumerable<T>> input) =>
-            new RandomSequence<T>(input);
+            new RandomSequenceImpl<T>(input);
 
         public static Random<IEnumerable<T>> AsRandom<T>(this RandomSequence<T> input) =>
             input.Random;
@@ -33,11 +36,11 @@ namespace LinqGarden
             {
                 foreach (var value in input)
                 {
-                    yield return value.Function(random);
+                    yield return value.RawFunc(random);
                 }
             }
 
-            return new Random<IEnumerable<T>>(ConcatImpl).AsRandomSequence();
+            return new RandomImpl<IEnumerable<T>>(ConcatImpl).AsRandomSequence();
         }
 
         public static RandomSequence<T> Return<T>(IEnumerable<T> input) =>
