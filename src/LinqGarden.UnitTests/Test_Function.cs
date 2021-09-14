@@ -13,14 +13,14 @@ namespace LinqGarden.UnitTests
         {
             var expectedThrownException = new InvalidOperationException("Oh no");
 
-            FallibleFunction.Build(() =>
+            Function.FromAction(() =>
             {
                 if (true)
                 {
                     throw expectedThrownException;
                 }
             })
-            .Catch<InvalidOperationException>().Invoke()
+            .CatchAsFailure<InvalidOperationException>().Invoke()
             .GetFailure().Should().Be(expectedThrownException.ToMaybe());
         }
 
@@ -30,7 +30,7 @@ namespace LinqGarden.UnitTests
             var expectedThrownException = new Exception("Oh no");
             Assert.Throws<Exception>(() =>
             {
-                FallibleFunction.Build(() =>
+                Function.FromAction(() =>
                 {
                     if (true)
                     {
