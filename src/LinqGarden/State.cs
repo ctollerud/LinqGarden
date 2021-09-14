@@ -77,9 +77,6 @@ namespace LinqGarden
 			Func<TVal1, State<TState, TVal2>> projection ) =>
 			source.SelectMany( projection, ( _, y ) => y );
 
-
-
-
         public static State<TState, ICollection<TResultItem>> Concat<TState, TResultItem>(
             IEnumerable<State<TState, TResultItem>> states) =>
             MakeRaw<TState, ICollection<TResultItem>>(initialStateValue =>

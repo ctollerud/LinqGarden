@@ -15,7 +15,6 @@ namespace LinqGarden
         new public FallibleExceptionFunction<TIn, Exception, TSuccess> CatchAsFailure<TException2>()
             where TException2 : Exception =>
                 Function.CatchAsFailure<TIn, Exception, TSuccess, TException2>(this);
-
     }
 
     public interface FallibleFunction<in TIn, out TFailure, out TSuccess>
@@ -47,6 +46,13 @@ namespace LinqGarden
         where TException : Exception
     {
         Func<TIn, Fallible<TException, TSuccess>> Function<TIn, Fallible<TException, TSuccess>>.RawFunc => RawFunc;
+    }
+
+    internal record FallibleFunctionImpl<TIn,TFailure,TSuccess>(
+        Func<TIn,Fallible<TFailure,TSuccess>> RawFunc
+    ) : FallibleFunction<TIn,TFailure,TSuccess>
+    {
+        Func<TIn, Fallible<TFailure, TSuccess>> Function<TIn, Fallible<TFailure, TSuccess>>.RawFunc => RawFunc;
     }
 
     public static class Function
@@ -101,6 +107,25 @@ namespace LinqGarden
                      return Fallible.Success<TException, TSuccess>(success);
                  });
 
+        public static FallibleFunction<TIn, TFailure, TSuccess> CatchAsFailure<TIn, TSuccess, TException, TFailure>(
+            this Function<TIn, TSuccess> input,
+            Func<TException,TFailure> convertToFailure )
+            where TException : Exception =>
+                new FallibleFunctionImpl<TIn, TFailure, TSuccess>(x =>
+                {
+                    TSuccess success;
+                    try
+                    {
+                        success = input.Invoke(x);
+                    }
+                    catch (TException exception)
+                    {
+                        return Fallible.Failure<TFailure, TSuccess>( convertToFailure( exception ) );
+                    }
+
+                    return Fallible.Success<TFailure, TSuccess>(success);
+                });
+
         public static Function<TIn, TOut> AsFunction<TIn, TOut>(this Function<TIn, TOut> input) =>
             input;
 
@@ -131,6 +156,31 @@ namespace LinqGarden
                 input
                 .AsFunction()
                 .Select(fallible => fallible.To<TOut>(ifFailure, ifSuccess));
+
+        public static FallibleFunction<TIn, TFailure, TSuccess> AsFallibleFunction<TIn, TFailure, TSuccess>(
+            this Function<TIn, Fallible<TFailure, TSuccess>> input) =>
+                input is FallibleFunction<TIn, TFailure, TSuccess> f
+                ? f
+                : new FallibleFunctionImpl<TIn, TFailure, TSuccess>(input.RawFunc);
+
+        public static FallibleFunction<TIn, TFailureNew, TSuccess> SelectFailure<TIn, TFailureOld, TSuccess, TFailureNew>(
+            this FallibleFunction<TIn, TFailureOld, TSuccess> input,
+            Func<TFailureOld, TFailureNew> failureSelector) =>
+                input.AsFunction()
+                .Select(fallible => fallible.SelectFailure(failureSelector))
+                .AsFallibleFunction();
+
+        public static FallibleFunction<TIn, TFailure, TSuccess> CatchAsFailure<TIn, TFailure, TSuccess, TException>(
+            this FallibleFunction<TIn, TFailure, TSuccess> input,
+            Func<TException, TFailure> convertToFailure) where TException : Exception =>
+                input.AsFunction().CatchAsFailure<TException>()
+                .To<Fallible<TFailure, TSuccess>>(
+                    exception => Fallible.Failure<TFailure, TSuccess>(convertToFailure(exception)),
+                    fallible => fallible)
+                .AsFallibleFunction();
+                
+
+
 
             
     }
